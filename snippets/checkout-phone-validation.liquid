@@ -1,0 +1,68 @@
+<style>
+    #phone-validation-message {
+        display: block;
+        color: {{ settings.checkout_error_color }};
+    }
+</style>
+
+
+<script>
+    Checkout.$(document).on(`page:load page:change`, () => {
+
+        if(Shopify.Checkout.step == 'contact_information'){
+
+            let phoneNumberContainer = document.querySelector( `[data-address-field="phone"]`)
+            phoneNumberContainer.innerHTML += `<div id="phone-validation-message"></div>`
+
+            let phoneNumberInput = document.querySelector(`[data-address-field="phone"] input`)
+
+            phoneNumberInput.addEventListener('blur', (e)=>{
+                // strip out the spaces from the phone number input value
+                let phoneNum = getPhoneNumberProcessed()
+                if(isPhoneNumberValid(phoneNum)){
+                    // phone number is valid
+                    updatePhoneValidationMessage('')
+                } else {
+                    // phone number is invalid
+                    updatePhoneValidationMessage('Sorry please correct your phone number in Singapore.')
+                }
+            })
+
+            let form = document.querySelector(`[data-step="contact_information"] form`)
+            let formSubmitBtn = document.querySelector(`[data-step="contact_information"] form [type="submit"]`)
+            formSubmitBtn.addEventListener('click', (e) => {
+
+                e.preventDefault()
+                let phoneNum = getPhoneNumberProcessed()
+                if(isPhoneNumberValid(phoneNum)){
+                    // phone number is valid
+                    updatePhoneValidationMessage('')
+                    form.submit()
+                } else {
+                    // phone number is invalid
+                    updatePhoneValidationMessage('Sorry please correct your phone number in Singapore.')
+                }
+            })
+        }
+    });
+
+
+    /** return a pre-processed phone number without spaces */
+    const getPhoneNumberProcessed = () => {
+        let phoneNumberInput = document.querySelector(`[data-address-field="phone"] input`)
+        return phoneNumberInput.value.replace(/\s/g, '')
+    }
+
+    /** Return true if the phone number is valid for SG; otherwise false */
+    const isPhoneNumberValid = (phoneNumber) => {
+        let regex = new RegExp("^[6|8|9]\\d{7}$|^\\+65[6|8|9]\\d{7}$")
+        return regex.test(phoneNumber)
+    }
+
+    /** update the status message of phone validation in front end */
+    const updatePhoneValidationMessage = (message) => {
+        let messageField = document.getElementById("phone-validation-message")
+        messageField.innerHTML = `<span>${message}</span>`
+    }
+
+</script>
